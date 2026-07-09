@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import { computeLayout } from './gauge.js';
+import { computeLayout, ROWS_PER_HLINE } from './gauge.js';
 import { renderToCanvas, renderToPdf } from './render.js';
 
 const JPEG_DPI = 300;
@@ -41,8 +41,8 @@ function updatePreview() {
   previewCanvas.style.width = `${paneWidth}px`;
 
   const cellW = layout.cellW.toFixed(2);
-  const cellH = layout.cellH.toFixed(2);
-  gridInfo.textContent = `1マス: 幅 ${cellW}mm × 高さ ${cellH}mm(${layout.cols}目 × ${layout.rowCount}段がA4に入ります)`;
+  const cellH2 = (layout.cellH * ROWS_PER_HLINE).toFixed(2);
+  gridInfo.textContent = `1マス: 幅 ${cellW}mm(1目) × 高さ ${cellH2}mm(2段=1往復)。${layout.cols}目 × ${layout.rowCount}段がA4に入ります`;
 }
 
 function downloadPdf() {

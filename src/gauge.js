@@ -3,6 +3,7 @@
 export const A4 = { width: 210, height: 297 }; // mm
 export const MARGIN_MM = 10; // 用紙余白
 export const HEADER_MM = 8; // ゲージ表記用のヘッダー領域
+export const ROWS_PER_HLINE = 2; // 編み物は2段で1往復のため横線は2段ごと
 
 /**
  * 入力値を「10cmあたり」に正規化する。
@@ -42,7 +43,8 @@ export function computeLayout({ stitches, rows, unit, orientation, boldEvery }) 
   const areaW = paperW - MARGIN_MM * 2;
   const areaH = paperH - MARGIN_MM * 2 - HEADER_MM;
   const cols = Math.max(1, Math.floor(areaW / cellW));
-  const rowCount = Math.max(1, Math.floor(areaH / cellH));
+  // 2段で1往復なので横線は2段ごと。段数は偶数に揃える
+  const rowCount = Math.max(ROWS_PER_HLINE, Math.floor(areaH / (cellH * ROWS_PER_HLINE)) * ROWS_PER_HLINE);
 
   const gridW = cols * cellW;
   const gridH = rowCount * cellH;
@@ -57,7 +59,7 @@ export function computeLayout({ stitches, rows, unit, orientation, boldEvery }) 
     });
   }
   const hLines = [];
-  for (let j = 0; j <= rowCount; j++) {
+  for (let j = 0; j <= rowCount; j += ROWS_PER_HLINE) {
     hLines.push({
       y: originY + j * cellH,
       bold: boldEvery > 0 && j % boldEvery === 0,
@@ -70,8 +72,10 @@ export function computeLayout({ stitches, rows, unit, orientation, boldEvery }) 
   for (let i = labelEvery; i <= cols; i += labelEvery) {
     xLabels.push({ x: originX + i * cellW, text: String(i) });
   }
+  // 段のラベルは横線がある位置(偶数段)にだけ付ける
+  const yLabelEvery = labelEvery % ROWS_PER_HLINE === 0 ? labelEvery : labelEvery * ROWS_PER_HLINE;
   const yLabels = [];
-  for (let j = labelEvery; j <= rowCount; j += labelEvery) {
+  for (let j = yLabelEvery; j <= rowCount; j += yLabelEvery) {
     yLabels.push({ y: originY + j * cellH, text: String(j) });
   }
 
