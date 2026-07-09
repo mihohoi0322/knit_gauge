@@ -72,14 +72,14 @@ export function renderToCanvas(canvas, layout, pxPerMm) {
     ctx.fillText(l.text, left - 1, l.y + AXIS_NUM_FONT_MM * 0.35);
   }
 
-  // 軸タイトル: 下中央「目数 →」、左中央「段数 ↓」(回転)
+  // 軸タイトル: 下中央「目数 →」、左中央「段数 →」(回転、段は下から上へ数える)
   ctx.font = `${AXIS_TITLE_FONT_MM}px sans-serif`;
   ctx.textAlign = 'center';
   ctx.fillText('目数 →', (left + right) / 2, bottom + AXIS_NUM_FONT_MM + AXIS_TITLE_FONT_MM + 2);
   ctx.save();
   ctx.translate(left - AXIS_NUM_FONT_MM - 3.5, (top + bottom) / 2);
   ctx.rotate(-Math.PI / 2);
-  ctx.fillText('← 段数', 0, 0);
+  ctx.fillText('段数 →', 0, 0);
   ctx.restore();
 }
 
@@ -133,7 +133,7 @@ export function renderToPdf(doc, layout) {
     doc.text(l.text, left - 1, l.y + AXIS_NUM_FONT_MM * 0.35, { align: 'right' });
   }
 
-  // 軸タイトル: 下中央「目数 →」、左中央「← 段数」(縦向き)
+  // 軸タイトル: 下中央「目数 →」、左中央「段数 →」(縦向き、下から上へ)
   const xTitle = makeLabelImage('目数 →', AXIS_TITLE_FONT_MM);
   doc.addImage(
     xTitle.dataUrl,
@@ -143,7 +143,7 @@ export function renderToPdf(doc, layout) {
     xTitle.widthMm,
     xTitle.heightMm,
   );
-  const yTitle = makeLabelImage('← 段数', AXIS_TITLE_FONT_MM, true);
+  const yTitle = makeLabelImage('段数 →', AXIS_TITLE_FONT_MM, true);
   doc.addImage(
     yTitle.dataUrl,
     'PNG',

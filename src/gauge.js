@@ -58,11 +58,12 @@ export function computeLayout({ stitches, rows, unit, orientation, boldEvery }) 
       bold: boldEvery > 0 && i % boldEvery === 0,
     });
   }
+  // 段は下から数える(編み進む方向)ため、太線・数字とも下端を0段目とする
   const hLines = [];
   for (let j = 0; j <= rowCount; j += ROWS_PER_HLINE) {
     hLines.push({
       y: originY + j * cellH,
-      bold: boldEvery > 0 && j % boldEvery === 0,
+      bold: boldEvery > 0 && (rowCount - j) % boldEvery === 0,
     });
   }
 
@@ -72,11 +73,11 @@ export function computeLayout({ stitches, rows, unit, orientation, boldEvery }) 
   for (let i = labelEvery; i <= cols; i += labelEvery) {
     xLabels.push({ x: originX + i * cellW, text: String(i) });
   }
-  // 段のラベルは横線がある位置(偶数段)にだけ付ける
+  // 段のラベルは下から数え、横線がある位置(偶数段)にだけ付ける
   const yLabelEvery = labelEvery % ROWS_PER_HLINE === 0 ? labelEvery : labelEvery * ROWS_PER_HLINE;
   const yLabels = [];
-  for (let j = yLabelEvery; j <= rowCount; j += yLabelEvery) {
-    yLabels.push({ y: originY + j * cellH, text: String(j) });
+  for (let c = yLabelEvery; c <= rowCount; c += yLabelEvery) {
+    yLabels.push({ y: originY + (rowCount - c) * cellH, text: String(c) });
   }
 
   const unitLabel = unit === 'per1cm' ? '1cm' : '10cm';
