@@ -64,8 +64,19 @@ export function computeLayout({ stitches, rows, unit, orientation, boldEvery }) 
     });
   }
 
+  // 軸の数字ラベル(太線の間隔ごと。太線なしのときは10マスごと)
+  const labelEvery = boldEvery > 0 ? boldEvery : 10;
+  const xLabels = [];
+  for (let i = labelEvery; i <= cols; i += labelEvery) {
+    xLabels.push({ x: originX + i * cellW, text: String(i) });
+  }
+  const yLabels = [];
+  for (let j = labelEvery; j <= rowCount; j += labelEvery) {
+    yLabels.push({ y: originY + j * cellH, text: String(j) });
+  }
+
   const unitLabel = unit === 'per1cm' ? '1cm' : '10cm';
-  const label = `ゲージ: ${stitches}目 × ${rows}段 / ${unitLabel}`;
+  const label = `ゲージ: ${stitches}目(横) × ${rows}段(縦) / ${unitLabel}`;
 
   return {
     paperW,
@@ -80,6 +91,8 @@ export function computeLayout({ stitches, rows, unit, orientation, boldEvery }) 
     rowCount,
     vLines,
     hLines,
+    xLabels,
+    yLabels,
     label,
   };
 }

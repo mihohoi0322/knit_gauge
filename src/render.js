@@ -3,6 +3,8 @@
 const THIN_LINE_MM = 0.15;
 const BOLD_LINE_MM = 0.45;
 const LABEL_FONT_MM = 4; // ゲージ表記の文字サイズ
+const AXIS_NUM_FONT_MM = 2.5; // 軸の数字
+const AXIS_TITLE_FONT_MM = 3; // 「目数」「段数」の軸タイトル
 
 const THIN_COLOR = '#9db4c8';
 const BOLD_COLOR = '#3d6a92';
@@ -58,6 +60,27 @@ export function renderToCanvas(canvas, layout, pxPerMm) {
   ctx.textAlign = 'right';
   ctx.textBaseline = 'alphabetic';
   ctx.fillText(layout.label, right, layout.originY - 2);
+
+  // 軸の数字: 下辺に目数、左辺に段数
+  ctx.font = `${AXIS_NUM_FONT_MM}px sans-serif`;
+  ctx.textAlign = 'center';
+  for (const l of layout.xLabels) {
+    ctx.fillText(l.text, l.x, bottom + AXIS_NUM_FONT_MM + 0.8);
+  }
+  ctx.textAlign = 'right';
+  for (const l of layout.yLabels) {
+    ctx.fillText(l.text, left - 1, l.y + AXIS_NUM_FONT_MM * 0.35);
+  }
+
+  // 軸タイトル: 下中央「目数 →」、左中央「段数 ↓」(回転)
+  ctx.font = `${AXIS_TITLE_FONT_MM}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillText('目数 →', (left + right) / 2, bottom + AXIS_NUM_FONT_MM + AXIS_TITLE_FONT_MM + 2);
+  ctx.save();
+  ctx.translate(left - AXIS_NUM_FONT_MM - 3.5, (top + bottom) / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('← 段数', 0, 0);
+  ctx.restore();
 }
 
 /**
@@ -88,9 +111,9 @@ export function renderToPdf(doc, layout) {
   doc.setLineWidth(BOLD_LINE_MM);
   doc.rect(left, top, layout.gridW, layout.gridH);
 
-  // jsPDF の標準フォントは日本語を含まないため、ゲージ表記は
-  // Canvas で描画した画像として右上に貼り付ける(フォント埋め込み不要)
-  const labelImage = makeLabelImage(layout.label);
+  // jsPDF の標準フォントは日本語を含まないため、ゲージ表記や軸タイトルは
+  // Canvas で描画した画像として貼り付ける(フォント埋め込み不要)
+  const labelImage = makeLabelImage(layout.label, LABEL_FONT_MM);
   doc.addImage(
     labelImage.dataUrl,
     'PNG',
@@ -99,29 +122,65 @@ export function renderToPdf(doc, layout) {
     labelImage.widthMm,
     labelImage.heightMm,
   );
+
+  // 軸の数字(数字のみなので標準フォントで描ける)
+  doc.setTextColor(LABEL_COLOR);
+  doc.setFontSize(AXIS_NUM_FONT_MM * PT_PER_MM);
+  for (const l of layout.xLabels) {
+    doc.text(l.text, l.x, bottom + AXIS_NUM_FONT_MM + 0.8, { align: 'center' });
+  }
+  for (const l of layout.yLabels) {
+    doc.text(l.text, left - 1, l.y + AXIS_NUM_FONT_MM * 0.35, { align: 'right' });
+  }
+
+  // 軸タイトル: 下中央「目数 →」、左中央「← 段数」(縦向き)
+  const xTitle = makeLabelImage('目数 →', AXIS_TITLE_FONT_MM);
+  doc.addImage(
+    xTitle.dataUrl,
+    'PNG',
+    (left + right) / 2 - xTitle.widthMm / 2,
+    bottom + AXIS_NUM_FONT_MM + 1.6,
+    xTitle.widthMm,
+    xTitle.heightMm,
+  );
+  const yTitle = makeLabelImage('← 段数', AXIS_TITLE_FONT_MM, true);
+  doc.addImage(
+    yTitle.dataUrl,
+    'PNG',
+    left - AXIS_NUM_FONT_MM - 3.5 - yTitle.widthMm / 2,
+    (top + bottom) / 2 - yTitle.heightMm / 2,
+    yTitle.widthMm,
+    yTitle.heightMm,
+  );
 }
 
-function makeLabelImage(text) {
+const PT_PER_MM = 72 / 25.4;
+
+function makeLabelImage(text, fontMm, vertical = false) {
   const pxPerMm = 12; // 約 300dpi 相当
-  const fontPx = LABEL_FONT_MM * pxPerMm;
-  const heightMm = LABEL_FONT_MM * 1.4;
+  const fontPx = fontMm * pxPerMm;
+  const lineHeightMm = fontMm * 1.4;
 
   const canvas = document.createElement('canvas');
   const measureCtx = canvas.getContext('2d');
   measureCtx.font = `${fontPx}px sans-serif`;
-  const widthPx = Math.ceil(measureCtx.measureText(text).width);
+  const textWidthPx = Math.ceil(measureCtx.measureText(text).width);
+  const lineHeightPx = Math.round(lineHeightMm * pxPerMm);
 
-  canvas.width = widthPx;
-  canvas.height = Math.round(heightMm * pxPerMm);
+  // vertical の場合はテキストを -90° 回転した状態で画像化する
+  canvas.width = vertical ? lineHeightPx : textWidthPx;
+  canvas.height = vertical ? textWidthPx : lineHeightPx;
   const ctx = canvas.getContext('2d');
+  if (vertical) {
+    ctx.translate(0, textWidthPx);
+    ctx.rotate(-Math.PI / 2);
+  }
   ctx.font = `${fontPx}px sans-serif`;
   ctx.fillStyle = LABEL_COLOR;
   ctx.textBaseline = 'top';
   ctx.fillText(text, 0, 0);
 
-  return {
-    dataUrl: canvas.toDataURL('image/png'),
-    widthMm: widthPx / pxPerMm,
-    heightMm,
-  };
+  const widthMm = canvas.width / pxPerMm;
+  const heightMm = canvas.height / pxPerMm;
+  return { dataUrl: canvas.toDataURL('image/png'), widthMm, heightMm };
 }
