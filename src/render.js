@@ -5,6 +5,7 @@ const BOLD_LINE_MM = 0.45;
 const LABEL_FONT_MM = 4; // ゲージ表記の文字サイズ
 const AXIS_NUM_FONT_MM = 2.5; // 軸の数字
 const AXIS_TITLE_FONT_MM = 3; // 「目数」「段数」の軸タイトル
+const DASH_PATTERN_MM = [1.2, 1]; // 奇数段の点線パターン
 
 const THIN_COLOR = '#9db4c8';
 const BOLD_COLOR = '#3d6a92';
@@ -30,6 +31,18 @@ export function renderToCanvas(canvas, layout, pxPerMm) {
   const bottom = layout.originY + layout.gridH;
   const left = layout.originX;
   const right = layout.originX + layout.gridW;
+
+  // 往復の間の1段は点線で描く
+  ctx.strokeStyle = THIN_COLOR;
+  ctx.lineWidth = THIN_LINE_MM;
+  ctx.setLineDash(DASH_PATTERN_MM);
+  ctx.beginPath();
+  for (const line of layout.hDashLines) {
+    ctx.moveTo(left, line.y);
+    ctx.lineTo(right, line.y);
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
 
   // 細線 → 太線の順に描き、太線が上に来るようにする
   for (const bold of [false, true]) {
@@ -93,6 +106,15 @@ export function renderToPdf(doc, layout) {
   const bottom = layout.originY + layout.gridH;
   const left = layout.originX;
   const right = layout.originX + layout.gridW;
+
+  // 往復の間の1段は点線で描く
+  doc.setDrawColor(THIN_COLOR);
+  doc.setLineWidth(THIN_LINE_MM);
+  doc.setLineDashPattern(DASH_PATTERN_MM, 0);
+  for (const line of layout.hDashLines) {
+    doc.line(left, line.y, right, line.y);
+  }
+  doc.setLineDashPattern([], 0);
 
   for (const bold of [false, true]) {
     doc.setDrawColor(bold ? BOLD_COLOR : THIN_COLOR);

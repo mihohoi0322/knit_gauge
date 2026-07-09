@@ -66,6 +66,11 @@ export function computeLayout({ stitches, rows, unit, orientation, boldEvery }) 
       bold: boldEvery > 0 && (rowCount - j) % boldEvery === 0,
     });
   }
+  // 往復の間の1段(奇数段)は点線で引く
+  const hDashLines = [];
+  for (let j = 1; j < rowCount; j += ROWS_PER_HLINE) {
+    hDashLines.push({ y: originY + j * cellH });
+  }
 
   // 軸の数字ラベル(太線の間隔ごと。太線なしのときは10マスごと)
   const labelEvery = boldEvery > 0 ? boldEvery : 10;
@@ -96,6 +101,7 @@ export function computeLayout({ stitches, rows, unit, orientation, boldEvery }) 
     rowCount,
     vLines,
     hLines,
+    hDashLines,
     xLabels,
     yLabels,
     label,
