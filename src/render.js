@@ -12,7 +12,7 @@ const BOLD_COLOR = '#3d6a92';
 const LABEL_COLOR = '#333333';
 
 /**
- * Canvas に描画する(画面プレビューと JPEG 出力で共用)。
+ * Canvas に描画する(画面プレビューで使用)。
  * @param {HTMLCanvasElement} canvas
  * @param {object} layout computeLayout の結果
  * @param {number} pxPerMm 1mm あたりのピクセル数

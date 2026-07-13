@@ -2,9 +2,6 @@ import { jsPDF } from 'jspdf';
 import { computeLayout, ROWS_PER_HLINE } from './gauge.js';
 import { renderToCanvas, renderToPdf } from './render.js';
 
-const JPEG_DPI = 300;
-const MM_PER_INCH = 25.4;
-
 const form = document.getElementById('gauge-form');
 const stitchesInput = document.getElementById('stitches');
 const rowsInput = document.getElementById('rows');
@@ -59,27 +56,6 @@ function downloadPdf() {
   doc.save('knit-gauge.pdf');
 }
 
-function downloadJpeg() {
-  const opts = readOptions();
-  if (!validOptions(opts)) return;
-
-  const layout = computeLayout(opts);
-  const canvas = document.createElement('canvas');
-  renderToCanvas(canvas, layout, JPEG_DPI / MM_PER_INCH);
-  canvas.toBlob(
-    (blob) => {
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'knit-gauge.jpg';
-      link.click();
-      URL.revokeObjectURL(url);
-    },
-    'image/jpeg',
-    0.92,
-  );
-}
-
 // 単位切替時は入力値を換算して同じグリッドを保つ
 function onUnitChange(event) {
   const nextUnit = event.target.value;
@@ -103,6 +79,5 @@ for (const el of [stitchesInput, rowsInput, orientationSelect, boldEverySelect])
 }
 window.addEventListener('resize', updatePreview);
 document.getElementById('download-pdf').addEventListener('click', downloadPdf);
-document.getElementById('download-jpeg').addEventListener('click', downloadJpeg);
 
 updatePreview();
