@@ -12,66 +12,75 @@
   </head>
   <body>
     <header class="app-header">
-      <h1>編み物ゲージ方眼紙メーカー</h1>
-      <p>ゲージを入力すると、1マスが実寸の1目×1段になる製図用の方眼紙を作成できます。</p>
+      <div>
+        <div class="header-kicker">FOR HAND KNITTERS — 実寸プリント</div>
+        <h1>編み物ゲージ<br />方眼紙メーカー</h1>
+        <p class="header-lead">
+          ゲージを入力すると、1マスが実寸の1目×1段になる製図用の方眼紙を作成できます。
+        </p>
+      </div>
     </header>
 
     <main class="app-main">
       <form id="gauge-form" class="controls" autocomplete="off">
-        <fieldset>
-          <legend>ゲージ</legend>
-          <div class="field-row">
-            <label class="radio">
-              <input type="radio" name="unit" value="per10cm" checked />
-              10cmあたり
-            </label>
-            <label class="radio">
-              <input type="radio" name="unit" value="per1cm" />
-              1cmあたり
-            </label>
+        <div class="card">
+          <div class="card-kicker">ゲージ</div>
+          <div class="card-rows">
+            <div class="seg">
+              <label class="seg-opt">
+                <input type="radio" name="unit" value="per10cm" checked />
+                10cmあたり
+              </label>
+              <label class="seg-opt">
+                <input type="radio" name="unit" value="per1cm" />
+                1cmあたり
+              </label>
+            </div>
+            <div class="field-pair">
+              <div class="field">
+                <label for="stitches">目数(横)</label>
+                <input class="input" type="number" id="stitches" value="20" min="0.5" max="200" step="0.1" required />
+              </div>
+              <div class="field">
+                <label for="rows">段数(縦)</label>
+                <input class="input" type="number" id="rows" value="28" min="0.5" max="200" step="0.1" required />
+              </div>
+            </div>
           </div>
-          <div class="field-row">
-            <label>
-              目数(横)
-              <input type="number" id="stitches" value="20" min="0.5" max="200" step="0.1" required />
-            </label>
-            <label>
-              段数(縦)
-              <input type="number" id="rows" value="28" min="0.5" max="200" step="0.1" required />
-            </label>
-          </div>
-        </fieldset>
+        </div>
 
-        <fieldset>
-          <legend>用紙・線</legend>
-          <div class="field-row">
-            <label>
-              用紙の向き (A4)
-              <select id="orientation">
+        <div class="card">
+          <div class="card-kicker">用紙・線</div>
+          <div class="card-rows">
+            <div class="field">
+              <label for="orientation">用紙の向き (A4)</label>
+              <select class="input" id="orientation">
                 <option value="portrait" selected>縦</option>
                 <option value="landscape">横</option>
               </select>
-            </label>
-            <label>
-              太線の間隔
-              <select id="bold-every">
+            </div>
+            <div class="field">
+              <label for="bold-every">太線の間隔</label>
+              <select class="input" id="bold-every">
                 <option value="5">5マスごと</option>
                 <option value="10" selected>10マスごと</option>
                 <option value="0">なし</option>
               </select>
-            </label>
+            </div>
           </div>
-        </fieldset>
+        </div>
 
         <div class="actions">
-          <button type="button" id="download-pdf" class="primary">PDFをダウンロード</button>
+          <button type="button" id="download-pdf" class="btn btn-primary btn-block">PDFをダウンロード(実寸)</button>
+          <p class="note">PDFは実寸で出力されます。印刷時は「実際のサイズ」(拡大縮小なし)を選んでください。</p>
         </div>
-        <p class="note">PDFは実寸で出力されます。印刷時は「実際のサイズ」(拡大縮小なし)を選んでください。</p>
       </form>
 
       <section class="preview-pane">
         <p id="grid-info" class="grid-info"></p>
-        <canvas id="preview" aria-label="ゲージ方眼紙のプレビュー"></canvas>
+        <div class="preview-frame">
+          <canvas id="preview" aria-label="ゲージ方眼紙のプレビュー"></canvas>
+        </div>
       </section>
     </main>
 
